@@ -165,7 +165,7 @@ class LevelSetTree(object):
             _pickle.dump(self, f, _pickle.HIGHEST_PROTOCOL)
 
     def plot(self, form='mass', horizontal_spacing='uniform', color_nodes=[],
-             colormap='Dark2'):
+             colormap='Dark2', number_nodes=[]):
         """
         Plot the level set tree as a dendrogram and return coordinates and
         colors of the branches.
@@ -202,6 +202,11 @@ class LevelSetTree(object):
             Matplotlib colormap, used only if 'color_nodes' contains at least
             one node index. Default is the 'Dark2' colormap. "Qualitative"
             colormaps are highly recommended.
+
+        number_nodes : list, optional
+            Nodes to annotate on the output figure. Nodes are annotated by
+            writing their index number at the bottom of the level set tree
+            plot.
 
         Returns
         -------
@@ -338,6 +343,12 @@ class LevelSetTree(object):
 
         split_lines = _LineCollection(line_coords, colors=line_colors)
         ax.add_collection(split_lines)
+
+        ## Add numbers to the nodes, if specified
+        for idx in number_nodes:
+            horizontal_coord = node_coords[idx][0][0]
+            ax.text(horizontal_coord - 0.01, -0.035, str(idx),
+                horizontalalignment='left')
 
         return fig, node_coords, split_coords, node_colors
 
