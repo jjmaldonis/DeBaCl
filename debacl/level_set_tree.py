@@ -1260,6 +1260,74 @@ def construct_tree(X, k, prune_threshold=None, num_levels=None, verbose=False):
     return tree
 
 
+def construct_tree_from_precomputed_matrix(X, p, k, prune_threshold=None, num_levels=None, verbose=False):
+    """
+    Construct a level set tree from tabular data.
+
+    Parameters
+    ----------
+    X : 2-dimensional numpy array
+        A square distance matrix
+
+    p: int
+        Underlying dimensionality of the data that was used to create X, the distance matrix
+
+    k : int
+        Number of observations to consider as neighbors to a given point.
+
+    prune_threshold : int, optional
+        Leaf nodes with fewer than this number of members are recursively
+        merged into larger nodes. If 'None' (the default), then no pruning
+        is performed.
+
+    num_levels : int, optional
+        Number of density levels in the constructed tree. If None (default),
+        `num_levels` is internally set to be the number of rows in `X`.
+
+    verbose : bool, optional
+        If True, a progress indicator is printed at every 100th level of tree
+        construction.
+
+    Returns
+    -------
+    T : LevelSetTree
+        A pruned level set tree.
+
+    See Also
+    --------
+    construct_tree, construct_tree_from_graph, LevelSetTree
+
+    Examples
+    --------
+    >>> X = numpy.random.rand(100, 2)
+    >>> @numpy.vectorize
+    >>> def euclidean(i,j):
+    >>>     return scipy.spatial.distance.euclidean(X[i], X[j])
+    >>> X = numpy.fromfunction(euclidean, (100,100))
+    >>> tree = debacl.construct_tree_from_precomputed_matrix(X, p=2, k=8, prune_threshold=5)
+    >>> print(tree)
+    +----+-------------+-----------+------------+----------+------+--------+----------+
+    | id | start_level | end_level | start_mass | end_mass | size | parent | children |
+    +----+-------------+-----------+------------+----------+------+--------+----------+
+    | 0  |    0.000    |   0.870   |   0.000    |  0.450   | 100  |  None  |  [3, 4]  |
+    | 3  |    0.870    |   3.364   |   0.450    |  0.990   |  17  |   0    |    []    |
+    | 4  |    0.870    |   1.027   |   0.450    |  0.520   |  35  |   0    |  [7, 8]  |
+    | 7  |    1.027    |   1.755   |   0.520    |  0.870   |  8   |   4    |    []    |
+    | 8  |    1.027    |   3.392   |   0.520    |  1.000   |  23  |   4    |    []    |
+    +----+-------------+-----------+------------+----------+------+--------+----------+
+    """
+
+    sim_graph, radii = _utl.knn_graph(X, k, method='precomputed')
+
+    n, _ = X.shape
+    density = _utl.knn_density(radii, n, p, k)
+
+    tree = construct_tree_from_graph(adjacency_list=sim_graph, density=density,
+                                     prune_threshold=prune_threshold,
+                                     num_levels=num_levels, verbose=verbose)
+    return tree
+
+
 def construct_tree_from_graph(adjacency_list, density, prune_threshold=None,
                               num_levels=None, verbose=False):
     """

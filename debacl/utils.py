@@ -38,12 +38,13 @@ def knn_graph(X, k, method='brute_force', leaf_size=30):
     Parameters
     ----------
     X : numpy array | list [numpy arrays]
-        Data points, with each row as an observation.
+        Data points, with each row as an observation
+        OR a distance matrix if method='precomputed'
 
     k : int
         The number of points to consider as neighbors of any given observation.
 
-    method : {'brute-force', 'kd-tree', 'ball-tree'}, optional
+    method : {'brute-force', 'kd-tree', 'ball-tree', 'precomputed'}, optional
         Computing method.
 
         - 'brute-force': computes the (Euclidean) distance between all O(n^2)
@@ -61,11 +62,14 @@ def knn_graph(X, k, method='brute_force', leaf_size=30):
           distances. Typically much faster than 'brute-force', and works with
           up to a few hundred dimensions. Requires the scikit-learn library.
 
+        - 'precomputed': used when the matrix X is a precomputed distance
+          matrix.
+
     leaf_size : int, optional
         For the 'kd-tree' and 'ball-tree' methods, the number of observations
         in the leaf nodes. Leaves are not split further, so distance
         computations within leaf nodes are done by brute force. 'leaf_size' is
-        ignored for the 'brute-force' method.
+        ignored for the 'brute-force' and 'precomputed' methods.
 
     Returns
     -------
@@ -108,6 +112,19 @@ def knn_graph(X, k, method='brute_force', leaf_size=30):
         else:
             raise ImportError("The scikit-learn library could not be loaded." +
                               " It is required for the 'ball-tree' method.")
+
+    if method == 'precomputed':
+        # Pseudo-sort each row of the distance matrix so that the indices of the closest k elements are listed first
+        # The entries [...,:k] are not in sorted order by distance
+        neighbors = _np.argpartition(X, k)[:, 0:k]
+
+        # Get the distance values for the first k elements, and then sort 'neighbors' by those distance values
+        radii = X[_np.arange(n)[:, None], neighbors[:]]
+        order = radii.argsort(axis=1)
+        neighbors = neighbors[_np.arange(n)[:, None], order]
+
+        radii = radii[_np.arange(n)[:, None], order]
+        radii = radii[:, -1]
 
     else:  # assume brute-force
         if not _HAS_SCIPY:
