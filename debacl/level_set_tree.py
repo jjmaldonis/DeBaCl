@@ -1300,10 +1300,8 @@ def construct_tree_from_precomputed_matrix(X, p, k, prune_threshold=None, num_le
     Examples
     --------
     >>> X = numpy.random.rand(100, 2)
-    >>> @numpy.vectorize
-    >>> def euclidean(i,j):
-    >>>     return scipy.spatial.distance.euclidean(X[i], X[j])
-    >>> X = numpy.fromfunction(euclidean, (100,100))
+    >>> X = scipy.spatial.distance.pdist(data)
+    >>> X = scipy.spatial.distance.squareform(matrix)
     >>> tree = debacl.construct_tree_from_precomputed_matrix(X, p=2, k=8, prune_threshold=5)
     >>> print(tree)
     +----+-------------+-----------+------------+----------+------+--------+----------+
