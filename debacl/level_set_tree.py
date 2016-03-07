@@ -66,8 +66,9 @@ class LevelSetTree(object):
 
         LevelSetTree objects should not generally be instantiated directly,
         because they will contain empty node hierarchies. Use the tree
-        constructors :func:`construct_tree` or
-        :func:`construct_tree_from_graph` to instantiate a LevelSetTree model.
+        constructors :func:`construct_tree`, :func:`construct_tree_from_graph`,
+        or :func: `construct_tree_from_distance_matrix` to instantiate a
+        LevelSetTree model.
 
     Parameters
     ----------
@@ -1260,9 +1261,10 @@ def construct_tree(X, k, prune_threshold=None, num_levels=None, verbose=False):
     return tree
 
 
-def construct_tree_from_precomputed_matrix(X, p, k, prune_threshold=None, num_levels=None, verbose=False):
+def construct_tree_from_distance_matrix(X, p, k, prune_threshold=None,
+                                        num_levels=None, verbose=False):
     """
-    Construct a level set tree from tabular data.
+    Construct a level set tree from a precomputed distance matrix.
 
     Parameters
     ----------
@@ -1270,7 +1272,8 @@ def construct_tree_from_precomputed_matrix(X, p, k, prune_threshold=None, num_le
         A square distance matrix
 
     p: int
-        Underlying dimensionality of the data that was used to create X, the distance matrix
+        Underlying dimensionality of the data that was used to create X, the
+        distance matrix
 
     k : int
         Number of observations to consider as neighbors to a given point.
@@ -1300,9 +1303,11 @@ def construct_tree_from_precomputed_matrix(X, p, k, prune_threshold=None, num_le
     Examples
     --------
     >>> X = numpy.random.rand(100, 2)
-    >>> X = scipy.spatial.distance.pdist(data)
-    >>> X = scipy.spatial.distance.squareform(matrix)
-    >>> tree = debacl.construct_tree_from_precomputed_matrix(X, p=2, k=8, prune_threshold=5)
+    >>> distances = scipy.spatial.distance.pdist(X)
+    >>> distance_matrix = scipy.spatial.distance.squareform(distances)
+    >>> tree = debacl.construct_tree_from_distance_matrix(distance_matrix, p=2,
+    ...                                                   k=8,
+    ...                                                   prune_threshold=5)
     >>> print(tree)
     +----+-------------+-----------+------------+----------+------+--------+----------+
     | id | start_level | end_level | start_mass | end_mass | size | parent | children |

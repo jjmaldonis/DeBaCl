@@ -75,6 +75,16 @@ class TestSimilarityGraphs(unittest.TestCase):
             for neighbors, ans_neighbors in zip(knn, ans_graph):
                 self.assertItemsEqual(neighbors, ans_neighbors)
 
+        distances = scipy.spatial.distance.pdist(self.X)
+        distance_matrix = scipy.spatial.distance.squareform(distances)
+        knn, radii = utl.knn_graph(distance_matrix, k, method='precomputed')
+
+        ## Test precomputed method
+        assert_array_equal(radii, ans_radii)
+
+        for neighbors, ans_neighbors in zip(knn, ans_graph):
+            self.assertItemsEqual(neighbors, ans_neighbors)
+
     def test_epsilon_graph(self):
         """
         Test construction of the epsilon-nearest neighbor graph.

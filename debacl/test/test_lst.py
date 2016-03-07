@@ -183,6 +183,19 @@ class TestLSTConstructors(unittest.TestCase):
         self._check_tree_viability(tree)
         self._check_tree_correctness(tree)
 
+    def test_construct_from_distance_matrix(self):
+        """
+        Check viability and correctness of an LST constructed from a distance
+        matrix.
+        """
+        distances = scipy.spatial.distance.pdist(self.dataset)
+        distance_matrix = scipy.spatial.distance.squareform(distances)
+        tree = dcl.construct_tree_from_distance_matrix(distance_matrix, self.k,
+                                  prune_threshold=self.gamma)
+
+        self._check_tree_viability(tree)
+        self._check_tree_correctness(tree)
+
     def test_load(self):
         """
         Check viability and correctness of an LST saved then loaded from file.

@@ -114,17 +114,15 @@ def knn_graph(X, k, method='brute_force', leaf_size=30):
                               " It is required for the 'ball-tree' method.")
 
     if method == 'precomputed':
-        # Pseudo-sort each row of the distance matrix so that the indices of the closest k elements are listed first
-        # The entries [...,:k] are not in sorted order by distance
-        neighbors = _np.argpartition(X, k)[:, 0:k]
+        if X.ndim != 2 or X.shape[0] != X.shape[1]:
+            raise ValueError("array 'X' must be square")
 
-        # Get the distance values for the first k elements, and then sort 'neighbors' by those distance values
-        radii = X[_np.arange(n)[:, None], neighbors[:]]
-        order = radii.argsort(axis=1)
-        neighbors = neighbors[_np.arange(n)[:, None], order]
-
-        radii = radii[_np.arange(n)[:, None], order]
-        radii = radii[:, -1]
+        # Pseudo-sort each row of the distance matrix so that the indices of
+        # the closest k elements are listed first # The entries [...,:k-1] are
+        # not in sorted order by distance, but the kth entry is guaranteed to
+        # be in the correct spot
+        neighbors = _np.argpartition(X, k - 1)[:, :k]
+        radii = X[_np.arange(n), neighbors[:, -1]]
 
     else:  # assume brute-force
         if not _HAS_SCIPY:

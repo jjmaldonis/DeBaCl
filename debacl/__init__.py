@@ -19,6 +19,7 @@ __version__ = '1.1.dev0'
 
 from debacl.level_set_tree import construct_tree
 from debacl.level_set_tree import construct_tree_from_graph
+from debacl.level_set_tree import construct_tree_from_distance_matrix
 from debacl.level_set_tree import load_tree
 
 from debacl.level_set_tree import LevelSetTree
